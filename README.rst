@@ -2,6 +2,19 @@ ediblepickle
 =========================
 .. image:: https://travis-ci.org/tianhuil/ediblepickle.svg?branch=master
         :target: https://travis-ci.org/tianhuil/ediblepickle
+.. image:: https://img.shields.io/badge/python-2.6-blue.svg
+        :target: https://www.python.org/downloads/release/python-260/
+.. image:: https://img.shields.io/badge/python-2.7-blue.svg
+        :target: https://www.python.org/downloads/release/python-270/
+.. image:: https://img.shields.io/badge/python-3.3-blue.svg
+        :target: https://www.python.org/downloads/release/python-330/
+.. image:: https://img.shields.io/badge/python-3.4-blue.svg
+        :target: https://www.python.org/downloads/release/python-340/
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg
+        :target: https://www.python.org/downloads/release/python-350/
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+        :target: https://www.python.org/downloads/release/python-360/
+
 
 ediblepickle is an Apache v 2.0 licensed `checkpointing <http://en.wikipedia.org/wiki/Application_checkpointing>`__ utility.
 The simplest use case is to checkpoint an expensive computation that need not be repeated every time the program is
