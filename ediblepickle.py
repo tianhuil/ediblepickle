@@ -99,7 +99,7 @@ def checkpoint(key=0, unpickler=pickle.load, pickler=pickle.dump, work_dir=gette
 
     :param work_dir: The location where the checkpoint files are stored.
 
-    :param do_refresh: If enabled, this will not skip, effectively disabling the
+    :param refresh: If enabled, this will not skip execution, effectively disabling the
     decoration @checkpoint.
 
     REFRESHING: One of the intended ways to use the refresh feature is as follows:
