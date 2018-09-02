@@ -14,7 +14,7 @@ executed, as in:
     from ediblepickle import checkpoint
 
     # A checkpointed expensive function
-    @checkpoint(key=string.Template('m{0}_n{1}_${iterations}_$stride.csv'), work_dir='/tmp/intermediate_results', refresh=True)
+    @checkpoint(key=string.Template('m{0}_n{1}_${iterations}_$stride.csv'), work_dir='/tmp/intermediate_results', refresh=True, gzip=True)
     def expensive_computation(m, n, iterations=4, stride=1):
         for i in range(iterations):
             time.sleep(1)
@@ -42,6 +42,7 @@ Features
 - Configurable computation cache storage format (i.e use human friendly keys and data, instead of pickle binary data)
 - Specify refresh to flush the cache and recompute
 - Specify your own serialize/de-serialize (save/load) functions
+- Enable gzip flag to gzip results of default or custom serialization/deserialization routines.
 - Python logging, just define your own logger to activate it
 
 
