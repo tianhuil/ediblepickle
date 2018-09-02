@@ -20,6 +20,7 @@ from string import Template
 from tempfile import gettempdir
 import types
 import time
+import gzip
 
 __author__ = 'pavan.mnssk@gmail.com'
 
@@ -37,8 +38,22 @@ __author__ = 'pavan.mnssk@gmail.com'
 #     print diff/60/60/24
 
 
+def gzip_pickler(pickler):
+    def wrapped(data, f):
+        with gzip.GzipFile(mode='wb', fileobj=f) as gf:
+            pickler(data, gf)
+    return wrapped
 
-def checkpoint(key=0, unpickler=pickle.load, pickler=pickle.dump, work_dir=gettempdir(), refresh=False):
+
+def gzip_unpickler(unpickler):
+    def wrapped(f):
+        with gzip.GzipFile(mode='rb', fileobj=f) as gf:
+            return unpickler(gf)
+    return wrapped
+
+
+def checkpoint(key=0, unpickler=pickle.load, pickler=pickle.dump, work_dir=gettempdir(),
+               refresh=False, gzip=False):
     """
     A utility decorator to save intermediate results of a function. It is the
     caller's responsibility to specify a key naming scheme such that the output of
@@ -102,6 +117,9 @@ def checkpoint(key=0, unpickler=pickle.load, pickler=pickle.dump, work_dir=gette
     :param refresh: If enabled, this will not skip execution, effectively disabling the
     decoration @checkpoint.
 
+    :param gzip: If True, this will gzip the pickler and unpickler, making cached
+    saved results smaller on disk.  Default False.
+
     REFRESHING: One of the intended ways to use the refresh feature is as follows:
 
     Say you are checkpointing a function f1, f2; have a file or a place where you define refresh variables:
@@ -144,6 +162,13 @@ def checkpoint(key=0, unpickler=pickle.load, pickler=pickle.dump, work_dir=gette
 
             logging.info('checkpoint@ %s' % save_file)
 
+            if gzip:
+                _pickler    = gzip_pickler(pickler)
+                _unpickler  = gzip_unpickler(unpickler)
+            else:
+                _pickler    = pickler
+                _unpickler  = unpickler
+
             # cache_file doesn't exist, run the function and save output in checkpoint.
 
             if isinstance(refresh, types.FunctionType):
@@ -159,13 +184,13 @@ def checkpoint(key=0, unpickler=pickle.load, pickler=pickle.dump, work_dir=gette
                     raise
                 else:  # If the program is successful, then go ahead and call the save function.
                     with open(save_file, 'wb') as f:
-                        pickler(out, f)
+                        _pickler(out, f)
                         return out
             # Otherwise, load the checkpoint file and send it.
             else:
                 logging.info("Checkpoint exists. Loading from: %s" % save_file)
                 with open(save_file, 'rb') as f:
-                    return unpickler(f)
+                    return _unpickler(f)
                     # Todo: Sending options to load/save functions.
         return wrapped
 
