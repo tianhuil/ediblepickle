@@ -1,7 +1,7 @@
 ediblepickle
 =========================
-.. image:: https://travis-ci.org/mpavan/ediblepickle.png?branch=master
-        :target: https://travis-ci.org/mpavan/ediblepickle
+.. image:: https://travis-ci.org/tianhuil/ediblepickle.svg?branch=master
+        :target: https://travis-ci.org/tianhuil/ediblepickle
 
 ediblepickle is an Apache v 2.0 licensed `checkpointing <http://en.wikipedia.org/wiki/Application_checkpointing>`__ utility.
 The simplest use case is to checkpoint an expensive computation that need not be repeated every time the program is
