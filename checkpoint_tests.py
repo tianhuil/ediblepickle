@@ -37,7 +37,7 @@ def expensive_function_creates_checkpoint(n, start=0, stride=1):
 @checkpoint(key=Template('n{0}_start${start}_stride${stride}.txt'), pickler=save_ints, unpickler=load_ints,
            refresh=False)
 def expensive_function_loads_checkpoint(n, start=0, stride=1):
-    sleep(5)
+    sleep(SLEEP_TIME)
     return range(start, n, stride)
 
 
