@@ -27,7 +27,7 @@ CLASSIFIERS = [
 
 settings.update(
     name='ediblepickle',
-    version='1.1.3',
+    version='1.2.0',
     description='Checkpoint',
     long_description=open('README.rst').read(),
     author='Pavan Mallapragada',
