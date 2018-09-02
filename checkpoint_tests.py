@@ -13,12 +13,12 @@ SLEEP_TIME = 5
 
 def save_ints(integers, f):
     for i in integers:
-        f.write('%d' %i)
-        f.write('\n')
+        f.write('{0:d}'.format(i).encode('utf-8'))
+        f.write('\n'.encode('utf-8'))
 
 
 def load_ints(f):
-    return [int(x) for x in f.read().split('\n') if x != '']
+    return [int(x) for x in f.read().decode('utf-8').split('\n') if x != '']
 
 
 # SECTION 1 : TEMPLATE KEY TESTING
@@ -27,7 +27,7 @@ def load_ints(f):
 @checkpoint(key=Template('n{0}_start${start}_stride${stride}.txt'), pickler=save_ints, unpickler=load_ints, refresh=True)
 def expensive_function_creates_checkpoint(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 # Create a scenario, where the checkpoint is loaded after creation. This is not truly achievable since the @checkpoint
@@ -38,7 +38,7 @@ def expensive_function_creates_checkpoint(n, start=0, stride=1):
            refresh=False)
 def expensive_function_loads_checkpoint(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 def test_template_key_checkpoint_creation():
@@ -65,7 +65,7 @@ def test_template_key_checkpoint_creation():
 @timed(1)
 def test_template_key_checkpoint_loading():
     result = expensive_function_loads_checkpoint(100, start=10, stride=2)
-    assert (result == range(10, 100, 2))  # Make sure whats loaded is what should be loaded.
+    assert (result == list(range(10, 100, 2)))  # Make sure whats loaded is what should be loaded.
 
 
 
@@ -76,14 +76,14 @@ def test_template_key_checkpoint_loading():
 @checkpoint(key='test_file.txt', pickler=save_ints, unpickler=load_ints, refresh=False)
 def expensive_function_loads_checkpoint_str(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 # Create a scenario, where the @checkpoint is first created from 'test_file.txt'.
 @checkpoint(key='test_file.txt', pickler=save_ints, unpickler=load_ints, refresh=True)
 def expensive_function_creates_checkpoint_str(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 def test_string_key_checkpoint_creation():
     key = 'test_file.txt'
@@ -109,30 +109,30 @@ def test_string_key_checkpoint_creation():
 @timed(1)
 def test_string_key_checkpoint_loading():
     result = expensive_function_loads_checkpoint_str(100, start=10, stride=2)
-    assert (result == range(10, 100, 2))  # Make sure whats loaded is what should be loaded.
+    assert (result == list(range(10, 100, 2)))  # Make sure whats loaded is what should be loaded.
 
 
 # SECTION 3: LAMBDA KEY TESTING
 
 # Create a scenario, where the @checkpoint is loaded after creation; use the lambda filename.
-@checkpoint(key=lambda args, kwargs: 'lambda_n%d_start%d_stride%d.txt' % (args[0], kwargs['start'], kwargs['stride']),
+@checkpoint(key=lambda args, kwargs: 'lambda_n{0:d}_start{1:d}_stride{2:d}.txt'.format(args[0], kwargs['start'], kwargs['stride']),
            pickler=save_ints, unpickler=load_ints, refresh=False)
 def expensive_function_loads_checkpoint_lambda(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 # Create a scenario, where the @checkpoint is first created from 'test_file.txt'.
-@checkpoint(key=lambda args, kwargs: 'lambda_n%d_start%d_stride%d.txt' % (args[0], kwargs['start'], kwargs['stride']),
+@checkpoint(key=lambda args, kwargs: 'lambda_n{0:d}_start{1:d}_stride{2:d}.txt'.format(args[0], kwargs['start'], kwargs['stride']),
            pickler=save_ints, unpickler=load_ints, refresh=False)
 def expensive_function_creates_checkpoint_lambda(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 
 def test_lambda_key_checkpoint_creation():
-    key_func = lambda args, kwargs: 'lambda_n%d_start%d_stride%d.txt' % (args[0], kwargs['start'], kwargs['stride'])
+    key_func = lambda args, kwargs: 'lambda_n{0:d}_start{1:d}_stride{2:d}.txt'.format(args[0], kwargs['start'], kwargs['stride'])
     key = os.path.join(gettempdir(), key_func((100,), dict(start=10, stride=2)))
 
     out_file = os.path.join(gettempdir(), key)
@@ -156,33 +156,33 @@ def test_lambda_key_checkpoint_creation():
 @timed(1)
 def test_lambda_key_checkpoint_loading():
     result = expensive_function_loads_checkpoint_lambda(100, start=10, stride=2)
-    assert (result == range(10, 100, 2))  # Make sure whats loaded is what should be loaded.
+    assert (result == list(range(10, 100, 2)))  # Make sure whats loaded is what should be loaded.
 
 
 
 # SECTION 4: FUNCTION NAMER TESTING # same as lambda, but just for the heck of it lets test it.
 
 def key_maker(args, kwargs): # remember no *s here.
-    return 'key_maker_n%d_start%d_stride%d.txt' % (args[0], kwargs['start'], kwargs['stride'])
+    return 'key_maker_n{0:d}_start{1:d}_stride{2:d}.txt'.format(args[0], kwargs['start'], kwargs['stride'])
 
 
 # Create a scenario, where the @checkpoint is loaded after creation; use the lambda filename.
 @checkpoint(key=key_maker, pickler=save_ints, unpickler=load_ints, refresh=False)
 def expensive_function_loads_checkpoint_key_maker(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 # Create a scenario, where the @checkpoint is first created from 'test_file.txt'.
 @checkpoint(key=key_maker, pickler=save_ints, unpickler=load_ints, refresh=False)
 def expensive_function_creates_checkpoint_key_maker(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 
 def test_key_maker_key_checkpoint_creation():
-    key_func = lambda args, kwargs: 'key_maker_n%d_start%d_stride%d.txt' % (args[0], kwargs['start'], kwargs['stride'])
+    key_func = lambda args, kwargs: 'key_maker_n{0:d}_start{1:d}_stride{2:d}.txt'.format(args[0], kwargs['start'], kwargs['stride'])
     key = os.path.join(gettempdir(), key_func((100,), dict(start=10, stride=2)))
 
     out_file = os.path.join(gettempdir(), key)
@@ -206,7 +206,7 @@ def test_key_maker_key_checkpoint_creation():
 @timed(1)
 def test_key_maker_key_checkpoint_loading():
     result = expensive_function_loads_checkpoint_key_maker(100, start=10, stride=2)
-    assert (result == range(10, 100, 2))  # Make sure whats loaded is what should be loaded.
+    assert (result == list(range(10, 100, 2)))  # Make sure whats loaded is what should be loaded.
 
 
 # SECTION 5: REFRESH using lambda testing
@@ -215,14 +215,14 @@ def test_key_maker_key_checkpoint_loading():
 @checkpoint(key='test_file.txt', pickler=save_ints, unpickler=load_ints, refresh=lambda: 0)
 def expensive_function_loads_checkpoint_str_refresh_lambda(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 # Create a scenario, where the @checkpoint is first created from 'test_file.txt'.
 @checkpoint(key='test_file.txt', pickler=save_ints, unpickler=load_ints, refresh=lambda: 1)
 def expensive_function_creates_checkpoint_str_refresh_lambda(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 def test_string_key_checkpoint_creation_refresh_lambda():
     key = 'test_file.txt'
@@ -248,7 +248,7 @@ def test_string_key_checkpoint_creation_refresh_lambda():
 @timed(1)
 def test_string_key_checkpoint_loading_refresh_lambda():
     result = expensive_function_loads_checkpoint_str_refresh_lambda(100, start=10, stride=2)
-    assert (result == range(10, 100, 2))  # Make sure whats loaded is what should be loaded.
+    assert (result == list(range(10, 100, 2)))  # Make sure whats loaded is what should be loaded.
 
 
 # SECTION 6: GZIP STRING KEY TESTING
@@ -258,14 +258,14 @@ def test_string_key_checkpoint_loading_refresh_lambda():
 @checkpoint(key='test_file.txt.gz', gzip=True, refresh=False)
 def expensive_function_loads_checkpoint_gzip(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 
 # Create a scenario, where the @checkpoint is first created from 'test_file.txt'.
 @checkpoint(key='test_file.txt.gz', gzip=True, refresh=True)
 def expensive_function_creates_checkpoint_gzip(n, start=0, stride=1):
     sleep(SLEEP_TIME)
-    return range(start, n, stride)
+    return list(range(start, n, stride))
 
 def test_gzip_checkpoint_creation():
     key = 'test_file.txt'
@@ -291,5 +291,5 @@ def test_gzip_checkpoint_creation():
 @timed(1)
 def test_gzip_checkpoint_loading():
     result = expensive_function_loads_checkpoint_str(100, start=10, stride=2)
-    assert (result == range(10, 100, 2))  # Make sure whats loaded is what should be loaded.
+    assert (result == list(range(10, 100, 2)))  # Make sure whats loaded is what should be loaded.
 
